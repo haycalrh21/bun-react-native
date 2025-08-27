@@ -2,7 +2,7 @@
   "name": "rn-umkm",
   "scripts": {
     "dev": "bun run --hot src/index.ts",
-    "build": "bun run db:generate && bun build src/index.ts --outdir dist --target bun",
+    "build": "prisma generate && bun build src/index.ts --outdir dist --target bun",
     "start": "bun dist/index.js",
     "vercel-build": "prisma generate",
     "db:generate": "prisma generate",
