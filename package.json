@@ -1,7 +1,13 @@
 {
   "name": "rn-umkm",
   "scripts": {
-    "dev": "bun run --hot src/index.ts"
+    "dev": "bun run --hot src/index.ts",
+    "build": "bun build src/index.ts --outdir dist --target bun",
+    "start": "bun dist/index.js",
+    "db:generate": "prisma generate",
+    "db:push": "prisma db push",
+    "db:migrate": "prisma migrate dev",
+    "clean": "rm -rf dist"
   },
   "dependencies": {
     "@hono/node-server": "^1.19.0",
