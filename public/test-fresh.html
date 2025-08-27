@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>UMKM Auth Test - Fresh</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+        background: #f5f5f5;
+      }
+      .section {
+        margin-bottom: 30px;
+        padding: 20px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        background: white;
+      }
+      input,
+      button {
+        margin: 5px;
+        padding: 8px;
+        border: 1px solid #ddd;
+        border-radius: 3px;
+      }
+      button {
+        background: #007bff;
+        color: white;
+        cursor: pointer;
+      }
+      button:hover {
+        background: #0056b3;
+      }
+      .response {
+        margin-top: 10px;
+        padding: 10px;
+        background: #f8f9fa;
+        border-left: 3px solid #007bff;
+        white-space: pre-wrap;
+        font-family: monospace;
+      }
+      .success {
+        border-left-color: #28a745;
+      }
+      .error {
+        border-left-color: #dc3545;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>🆕 Fresh UMKM Authentication Test</h1>
+
+    <div
+      style="
+        background: #d4edda;
+        padding: 15px;
+        border: 1px solid #c3e6cb;
+        border-radius: 5px;
+        margin-bottom: 20px;
+      "
+    >
+      <strong>✅ Fresh Page:</strong> No cache issues here!<br />
+      <strong>Timestamp:</strong> <span id="timestamp"></span><br />
+      <strong>Correct Endpoints:</strong> Using Better Auth's /email format
+    </div>
+
+    <div class="section">
+      <h2>🔍 Debug - Check Available Endpoints</h2>
+      <button onclick="checkEndpoints()">Check Available Endpoints</button>
+      <div id="endpointResponse" class="response"></div>
+    </div>
+
+    <div class="section">
+      <h2>📝 Sign Up (Better Auth Format)</h2>
+      <input
+        type="email"
+        id="signupEmail"
+        placeholder="Email"
+        value="test@example.com"
+      />
+      <input
+        type="password"
+        id="signupPassword"
+        placeholder="Password"
+        value="password123"
+      />
+      <input type="text" id="signupName" placeholder="Name" value="Test User" />
+      <button onclick="signUp()">Sign Up</button>
+      <div id="signupResponse" class="response"></div>
+    </div>
+
+    <div class="section">
+      <h2>🔐 Sign In (Better Auth Format)</h2>
+      <input
+        type="email"
+        id="signinEmail"
+        placeholder="Email"
+        value="test@example.com"
+      />
+      <input
+        type="password"
+        id="signinPassword"
+        placeholder="Password"
+        value="password123"
+      />
+      <button onclick="signIn()">Sign In</button>
+      <div id="signinResponse" class="response"></div>
+    </div>
+
+    <div class="section">
+      <h2>👤 Get Session</h2>
+      <button onclick="getSession()">Get Session</button>
+      <div id="sessionResponse" class="response"></div>
+    </div>
+
+    <div class="section">
+      <h2>🔒 Test Protected Route</h2>
+      <button onclick="testProtected()">Test Protected</button>
+      <div id="protectedResponse" class="response"></div>
+    </div>
+
+    <div class="section">
+      <h2>🚪 Sign Out</h2>
+      <button onclick="signOut()">Sign Out</button>
+      <div id="signoutResponse" class="response"></div>
+    </div>
+
+    <script>
+      // Display current timestamp
+      document.getElementById("timestamp").textContent =
+        new Date().toLocaleString();
+
+      const API_BASE = "http://localhost:3000/api";
+
+      async function makeRequest(url, options = {}) {
+        try {
+          console.log(`Making request to: ${url}`);
+          const response = await fetch(url, {
+            credentials: "include",
+            ...options,
+          });
+
+          let data;
+          const contentType = response.headers.get("content-type");
+          if (contentType && contentType.includes("application/json")) {
+            data = await response.json();
+          } else {
+            data = await response.text();
+          }
+
+          console.log(`Response status: ${response.status}`, data);
+          return { response, data, status: response.status };
+        } catch (error) {
+          console.error(`Request failed:`, error);
+          return { error: error.message };
+        }
+      }
+
+      async function checkEndpoints() {
+        const { response, data, error } = await makeRequest("/debug/routes");
+        const authDebug = await makeRequest(`${API_BASE}/auth-debug`);
+
+        let result = "=== ENDPOINT DEBUG INFO ===\n\n";
+
+        if (error) {
+          result += `❌ Debug routes error: ${error}\n`;
+        } else {
+          result += `✅ Debug routes status: ${response.status}\n`;
+          result += `Data: ${JSON.stringify(data, null, 2)}\n\n`;
+        }
+
+        if (authDebug.error) {
+          result += `❌ Auth debug error: ${authDebug.error}\n`;
+        } else {
+          result += `✅ Auth debug status: ${authDebug.status}\n`;
+          result += `Data: ${JSON.stringify(authDebug.data, null, 2)}\n`;
+        }
+
+        document.getElementById("endpointResponse").textContent = result;
+      }
+
+      async function signUp() {
+        const email = document.getElementById("signupEmail").value;
+        const password = document.getElementById("signupPassword").value;
+        const name = document.getElementById("signupName").value;
+
+        const { response, data, error, status } = await makeRequest(
+          `${API_BASE}/auth/sign-up/email`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email, password, name }),
+          }
+        );
+
+        const resultEl = document.getElementById("signupResponse");
+        resultEl.className = `response ${
+          status >= 200 && status < 300 ? "success" : "error"
+        }`;
+        resultEl.textContent =
+          error || `Status: ${status}\n${JSON.stringify(data, null, 2)}`;
+      }
+
+      async function signIn() {
+        const email = document.getElementById("signinEmail").value;
+        const password = document.getElementById("signinPassword").value;
+
+        const { response, data, error, status } = await makeRequest(
+          `${API_BASE}/auth/sign-in/email`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email, password }),
+          }
+        );
+
+        const resultEl = document.getElementById("signinResponse");
+        resultEl.className = `response ${
+          status >= 200 && status < 300 ? "success" : "error"
+        }`;
+        resultEl.textContent =
+          error || `Status: ${status}\n${JSON.stringify(data, null, 2)}`;
+      }
+
+      async function getSession() {
+        const { response, data, error, status } = await makeRequest(
+          `${API_BASE}/auth/get-session`,
+          { method: "GET" }
+        );
+
+        const resultEl = document.getElementById("sessionResponse");
+        resultEl.className = `response ${
+          status >= 200 && status < 300 ? "success" : "error"
+        }`;
+        resultEl.textContent =
+          error || `Status: ${status}\n${JSON.stringify(data, null, 2)}`;
+      }
+
+      async function testProtected() {
+        const { response, data, error, status } = await makeRequest(
+          `${API_BASE}/users/me`,
+          { method: "GET" }
+        );
+
+        const resultEl = document.getElementById("protectedResponse");
+        resultEl.className = `response ${
+          status >= 200 && status < 300 ? "success" : "error"
+        }`;
+        resultEl.textContent =
+          error || `Status: ${status}\n${JSON.stringify(data, null, 2)}`;
+      }
+
+      async function signOut() {
+        const { response, data, error, status } = await makeRequest(
+          `${API_BASE}/auth/sign-out`,
+          { method: "POST" }
+        );
+
+        const resultEl = document.getElementById("signoutResponse");
+        resultEl.className = `response ${
+          status >= 200 && status < 300 ? "success" : "error"
+        }`;
+        resultEl.textContent =
+          error || `Status: ${status}\n${JSON.stringify(data, null, 2)}`;
+      }
+    </script>
+  </body>
+</html>

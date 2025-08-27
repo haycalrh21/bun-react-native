@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Test Product Creation</title>
+  </head>
+  <body>
+    <h1>Test Product Creation API</h1>
+    <button onclick="testCreateProduct()">Test Create Product</button>
+    <pre id="result"></pre>
+
+    <script>
+      async function testCreateProduct() {
+        const resultDiv = document.getElementById("result");
+
+        try {
+          const response = await fetch("/api/products/create-new-product", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              name: "Test Product from Browser",
+              description: "Test description from browser",
+              price: 50000,
+              stock: 10,
+              images: ["file:///test/path"], // Test with file:// URI
+            }),
+          });
+
+          const data = await response.json();
+          resultDiv.textContent =
+            `Status: ${response.status}\n` + JSON.stringify(data, null, 2);
+        } catch (error) {
+          resultDiv.textContent = "Error: " + error.message;
+        }
+      }
+    </script>
+  </body>
+</html>

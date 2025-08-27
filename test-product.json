@@ -1,0 +1,7 @@
+{
+  "name": "Test Product",
+  "description": "Test description",
+  "price": 50000,
+  "stock": 10,
+  "images": ["file:///test/path/image.jpg"]
+}
