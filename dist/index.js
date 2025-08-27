@@ -19968,6 +19968,7 @@ var require_prisma = __commonJS((exports) => {
       "db"
     ],
     activeProvider: "postgresql",
+    postinstall: false,
     inlineDatasources: {
       db: {
         url: {
@@ -65707,9 +65708,15 @@ var app_default = app;
 
 // src/index.ts
 var port = process.env.PORT || 3000;
-console.log(`Server is running on http://localhost:${port}`);
-Bun.serve({
-  fetch: app_default.fetch,
-  hostname: "0.0.0.0",
-  port
-});
+var src_default = app_default;
+if (true) {
+  console.log(`Server is running on http://localhost:${port}`);
+  Bun.serve({
+    fetch: app_default.fetch,
+    hostname: "0.0.0.0",
+    port
+  });
+}
+export {
+  src_default as default
+};

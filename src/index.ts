@@ -2,12 +2,11 @@ import app from "./app";
 
 const port = process.env.PORT || 3000;
 
-// Check if running in Vercel environment
-if (process.env.VERCEL || process.env.NODE_ENV === "production") {
-  // Export for Vercel serverless functions
-  export default app.fetch;
-} else {
-  // Local development with Bun
+// Export for Vercel serverless functions
+export default app;
+
+// Local development with Bun (only runs when not in production)
+if (process.env.NODE_ENV !== "production") {
   console.log(`Server is running on http://localhost:${port}`);
 
   Bun.serve({
